@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Encryption Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        body {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            background: black;
+            color: #0ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Cyberpunk animated background */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://media.giphy.com/media/3o7aCSPqXE5C6T8tBC/giphy.gif') no-repeat center center/cover;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 3em;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #00f;
+            animation: glitch 1.5s infinite alternate;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0 0 10px #0ff, 0 0 20px #00f; }
+            50% { text-shadow: -5px 0px 10px #ff00ff, 5px 0px 10px #00ffff; }
+            100% { text-shadow: 0 0 10px #0ff, 0 0 20px #00f; }
+        }
+
+        .container {
+            width: 50%;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 12px;
+            box-shadow: 0px 0px 30px rgba(0, 255, 255, 0.8);
+            animation: flicker 1.5s infinite alternate;
+        }
+
+        @keyframes flicker {
+            from { opacity: 0.9; }
+            to { opacity: 1; }
+        }
+
+        input, button {
+            margin: 15px;
+            padding: 12px;
+            width: 85%;
+            border-radius: 6px;
+            border: none;
+            font-size: 18px;
+            background: black;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            transition: 0.3s;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: bold;
+            border: 1px solid #0ff;
+            background: linear-gradient(45deg, #00ffcc, #0033ff);
+            color: white;
+            box-shadow: 0 0 20px cyan, 0 0 40px blue;
+            transition: all 0.3s ease-in-out;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px cyan; }
+            50% { box-shadow: 0 0 30px cyan; }
+            100% { box-shadow: 0 0 10px cyan; }
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #0033ff, #00ffcc);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #0ff;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #aaa;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Advanced Encryption Tool 🔐</h1>
+    <div class="container">
+        <h2>Secure Your Files with AES-256 Encryption</h2>
+        <input type="file" id="fileInput"><br>
+        <button onclick="playSound('click'); uploadFile('encrypt')">Encrypt 🔒</button>
+        <button onclick="playSound('click'); uploadFile('decrypt')">Decrypt 🔓</button>
+        <p id="status"></p>
+    </div>
+    <footer>
+        <p>Developed by Syeda Najaf | Implementing AES-256 Encryption with Secure Key Management</p>
+    </footer>
+
+    <!-- Background and event sounds -->
+    <audio id="introSound" src="{{ url_for('serve_sounds', filename='intro-sound-effect-272811.mp3') }}"></audio>
+    <audio id="bgSound" src="{{ url_for('serve_sounds', filename='dorm-door-opening-6038.mp3') }}" loop></audio>
+    <audio id="clickSound" src="{{ url_for('serve_sounds', filename='opening-movie-254465.mp3') }}"></audio>
+    <audio id="successSound" src="{{ url_for('serve_sounds', filename='success-1-6297.mp3') }}"></audio>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let introSound = document.getElementById("introSound");
+            let bgSound = document.getElementById("bgSound");
+
+            // Play intro sound first
+            introSound.play().then(() => {
+                console.log("Intro sound played.");
+                introSound.onended = () => {
+                    bgSound.play();
+                };
+            }).catch(() => {
+                console.log("Autoplay blocked. Waiting for user interaction...");
+                document.body.addEventListener("click", () => {
+                    introSound.play();
+                    introSound.onended = () => {
+                        bgSound.play();
+                    };
+                }, { once: true });
+            });
+        });
+
+        function playSound(type) {
+            let sound = document.getElementById(type + "Sound");
+            sound.play().catch(err => console.log("Error playing sound:", err));
+        }
+
+        function uploadFile(action) {
+            let fileInput = document.getElementById('fileInput').files[0];
+            if (!fileInput) {
+                alert("Please select a file first!");
+                return;
+            }
+            let formData = new FormData();
+            formData.append("file", fileInput);
+            fetch('/' + action, {
+                method: "POST",
+                body: formData
+            }).then(response => response.blob())
+              .then(blob => {
+                  playSound('success');
+                  let url = window.URL.createObjectURL(blob);
+                  let a = document.createElement("a");
+                  a.href = url;
+                  a.download = (action === "encrypt") ? "encrypted.aes" : "decrypted.txt";
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  document.getElementById("status").innerText = action.toUpperCase() + " SUCCESS!";
+              })
+              .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>

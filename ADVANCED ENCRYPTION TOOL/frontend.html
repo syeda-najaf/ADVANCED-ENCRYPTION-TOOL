@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Encryption Tool</title>
+</head>
+<body>
+    <h2>Encrypt a File</h2>
+    <input type="file" id="encryptFile">
+    <button onclick="encryptFile()">Encrypt</button>
+
+    <h2>Decrypt a File</h2>
+    <input type="file" id="decryptFile">
+    <button onclick="decryptFile()">Decrypt</button>
+
+    <script>
+        async function encryptFile() {
+            const file = document.getElementById("encryptFile").files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("http://127.0.0.1:5000/encrypt", { method: "POST", body: formData });
+            const blob = await response.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "encrypted.aes";
+            link.click();
+        }
+
+        async function decryptFile() {
+            const file = document.getElementById("decryptFile").files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("http://127.0.0.1:5000/decrypt", { method: "POST", body: formData });
+            const blob = await response.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "decrypted.txt";
+            link.click();
+        }
+    </script>
+</body>
+</html>
